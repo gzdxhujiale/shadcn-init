@@ -1,3 +1,4 @@
+import { ref, computed } from 'vue'
 import {
     AudioWaveform,
     BookOpen,
@@ -20,6 +21,7 @@ export interface NavSubItem {
     id: string
     title: string
     url: string
+    component?: string // 对应的页面组件名
     badge?: string // 可选徽章
 }
 
@@ -50,6 +52,7 @@ export interface ProjectItem {
     name: string
     url: string
     icon: LucideIcon
+    component?: string // 对应的页面组件名
 }
 
 export interface ProjectGroup {
@@ -153,8 +156,8 @@ export const defaultSidebarConfig: SidebarConfig = {
                     icon: SquareTerminal,
                     isOpen: true, // 设置为 true 则默认展开
                     items: [
-                        { id: 'todo', title: '待办清单', url: '#' },
-                        { id: 'history', title: '历史记录', url: '#' },
+                        { id: 'todo', title: '待办清单', url: '#', component: 'TodoList' },
+                        { id: 'history', title: '历史记录', url: '#', component: 'History' },
                     ],
                 },
                 {
@@ -164,9 +167,9 @@ export const defaultSidebarConfig: SidebarConfig = {
                     icon: Bot,
                     isOpen: true,
                     items: [
-                        { id: 'company', title: '公司经营仓', url: '#' },
-                        { id: 'ameba', title: '阿米巴经营仓', url: '#' },
-                        { id: 'store', title: '店铺经营仓', url: '#' },
+                        { id: 'company', title: '公司经营仓', url: '#', component: 'ReportCompany' },
+                        { id: 'ameba', title: '阿米巴经营仓', url: '#', component: 'ReportAmeba' },
+                        { id: 'store', title: '店铺经营仓', url: '#', component: 'ReportStore' },
                     ],
                 },
                 {
@@ -176,8 +179,8 @@ export const defaultSidebarConfig: SidebarConfig = {
                     icon: BookOpen,
                     isOpen: true,
                     items: [
-                        { id: 'self-service-bi', title: '数据看板', url: '#' },
-                        { id: 'comparison', title: '对比分析', url: '#' },
+                        { id: 'self-service-bi', title: '数据看板', url: '#', component: 'SelfServiceBi' },
+                        { id: 'comparison', title: '对比分析', url: '#', component: 'DashboardCompare' },
                     ],
                 },
                 {
@@ -187,11 +190,11 @@ export const defaultSidebarConfig: SidebarConfig = {
                     icon: Settings2,
                     isOpen: false,
                     items: [
-                        { id: 'user', title: '用户管理', url: '#' },
-                        { id: 'role', title: '角色管理', url: '#' },
-                        { id: 'permission', title: '权限管理', url: '#' },
-                        { id: 'apply', title: '权限申请', url: '#' },
-                        { id: 'log', title: '操作日志', url: '#' },
+                        { id: 'user', title: '用户管理', url: '#', component: 'RbacUser' },
+                        { id: 'role', title: '角色管理', url: '#', component: 'RbacRole' },
+                        { id: 'permission', title: '权限管理', url: '#', component: 'RbacPermission' },
+                        { id: 'apply', title: '权限申请', url: '#', component: 'RbacApply' },
+                        { id: 'log', title: '操作日志', url: '#', component: 'RbacLog' },
                     ],
                 },
                 {
@@ -201,8 +204,8 @@ export const defaultSidebarConfig: SidebarConfig = {
                     icon: Settings2,
                     isOpen: false,
                     items: [
-                        { id: 'dimension', title: '配置管理', url: '#' },
-                        { id: 'notification', title: '通知设置', url: '#' },
+                        { id: 'dimension', title: '配置管理', url: '#', component: 'DimensionManagement' },
+                        { id: 'notification', title: '通知设置', url: '#', component: 'NotificationSettings' },
                     ],
                 },
             ],
@@ -214,18 +217,8 @@ export const defaultSidebarConfig: SidebarConfig = {
             label: '文档',
             showMoreButton: true,
             projects: [
-                {
-                    id: 'data-dictionary',
-                    name: '数据字典',
-                    url: '#',
-                    icon: Frame,
-                },
-                {
-                    id: 'user-manual',
-                    name: '用户操作手册',
-                    url: '#',
-                    icon: PieChart,
-                },
+                { id: 'data-dictionary', name: '数据字典', url: '#', icon: Frame, component: 'DataDictionary', },
+                { id: 'user-manual', name: '用户操作手册', url: '#', icon: PieChart, component: 'UserManual', },
             ],
         },
     ],
@@ -304,4 +297,112 @@ export function createProjectGroup(
     id?: string
 ): ProjectGroup {
     return { id, label, projects, showMoreButton }
+}
+
+// ============================================
+// 导航状态管理
+// ============================================
+
+// 从配置中获取默认导航
+const firstNavGroup = defaultSidebarConfig.navGroups[0]
+const firstMainNav = firstNavGroup?.items[0]
+const firstSubNav = firstMainNav?.items?.[0]
+
+// 导航状态 (模块级别的单例状态)
+const currentMainNav = ref(firstMainNav?.title ?? '')
+const currentSubNav = ref(firstSubNav?.title ?? '')
+const detailTitle = ref<string | null>(null) // 存储详情页标题（第三级面包屑）
+
+/**
+ * 根据子项标题获取组件名
+ */
+export function getComponentByTitle(subTitle: string): string {
+    // 遍历所有导航组查找匹配的子项
+    for (const group of defaultSidebarConfig.navGroups) {
+        for (const mainItem of group.items) {
+            if (mainItem.items) {
+                for (const subItem of mainItem.items) {
+                    if (subItem.title === subTitle && subItem.component) {
+                        return subItem.component
+                    }
+                }
+            }
+        }
+    }
+    // 遍历项目组查找匹配
+    for (const projectGroup of defaultSidebarConfig.projectGroups) {
+        for (const project of projectGroup.projects) {
+            if (project.name === subTitle && project.component) {
+                return project.component
+            }
+        }
+    }
+    // 未找到则返回原始值
+    return subTitle
+}
+
+/**
+ * 根据子项ID获取组件名
+ */
+export function getComponentById(subId: string): string | undefined {
+    // 遍历所有导航组查找匹配的子项
+    for (const group of defaultSidebarConfig.navGroups) {
+        for (const mainItem of group.items) {
+            if (mainItem.items) {
+                for (const subItem of mainItem.items) {
+                    if (subItem.id === subId) {
+                        return subItem.component
+                    }
+                }
+            }
+        }
+    }
+    // 遍历项目组查找匹配
+    for (const projectGroup of defaultSidebarConfig.projectGroups) {
+        for (const project of projectGroup.projects) {
+            if (project.id === subId) {
+                return project.component
+            }
+        }
+    }
+    return undefined
+}
+
+/**
+ * 导航状态管理 Composable
+ * 用于管理当前选中的导航项和面包屑
+ */
+export function useNavigation() {
+    // 设置当前导航
+    const setNavigation = (mainNav: string, subNav: string) => {
+        currentMainNav.value = mainNav
+        currentSubNav.value = subNav
+    }
+
+    // 设置详情标题（用于第三级面包屑）
+    const setDetailTitle = (title: string | null) => {
+        detailTitle.value = title
+    }
+
+    // 计算面包屑数据
+    const breadcrumbs = computed(() => ({
+        main: currentMainNav.value,
+        sub: currentSubNav.value,
+        detail: detailTitle.value,
+    }))
+
+    // 计算当前页面组件名称
+    const currentPage = computed(() => {
+        return getComponentByTitle(currentSubNav.value)
+    })
+
+    return {
+        currentMainNav,
+        currentSubNav,
+        detailTitle,
+        breadcrumbs,
+        currentPage,
+        setNavigation,
+        setDetailTitle,
+    }
 }

@@ -20,19 +20,17 @@ src/
 │   ├── pages/                    # 📄 页面组件目录
 │   │   ├── workspace/            # 工作台相关页面
 │   │   │   └── TodoList.vue      # 待办清单示例
-│   │   ├── report/               # 报表相关页面 (待添加)
-│   │   ├── rbac/                 # 权限管理页面 (待添加)
-│   │   └── config/               # 系统配置页面 (待添加)
+│   │   ├── report/               # 报表相关页面
+│   │   ├── rbac/                 # 权限管理页面
+│   │   └── settings/             # 系统配置页面
 │   ├── ui/                       # shadcn-vue UI 组件
 │   ├── AppSidebar.vue            # 应用侧边栏
 │   ├── NavMain.vue               # 主导航组件
 │   ├── NavProjects.vue           # 项目/文档导航
 │   ├── NavUser.vue               # 用户信息组件
 │   └── TeamSwitcher.vue          # 团队切换器
-├── composables/
-│   └── useNavigation.ts          # 导航状态管理
 ├── config/
-│   └── sidebar.ts                # 侧边栏配置
+│   └── sidebar.ts                # 侧边栏配置 + 导航状态管理
 └── App.vue                       # 主应用组件
 ```
 
@@ -89,17 +87,19 @@ const pageComponents: Record<string, any> = {
 }
 ```
 
-#### 步骤 4：更新导航映射
+#### 步骤 4：配置导航映射
 
-在 `src/composables/useNavigation.ts` 的 `pageMap` 中添加映射：
+在 `src/config/sidebar.ts` 的 `navGroups` 配置中，为对应菜单项添加 `component` 字段：
 
 ```typescript
-const pageMap: Record<string, string> = {
-  '待办清单': 'TodoList',
-  '历史记录': 'History',  // 新增：中文标题 -> 组件名
-  // ...
-}
+// 在 defaultSidebarConfig.navGroups 中找到对应的子项
+items: [
+  { id: 'todo', title: '待办清单', url: '#', component: 'TodoList' },
+  { id: 'history', title: '历史记录', url: '#', component: 'History' },  // 新增
+],
 ```
+
+> 💡 **说明**：`component` 字段的值必须与 `App.vue` 中注册的组件名一致。
 
 ---
 
@@ -117,11 +117,21 @@ const pageMap: Record<string, string> = {
   icon: SomeIcon,
   isOpen: false,
   items: [
-    { id: 'sub-1', title: '子菜单1', url: '#' },
-    { id: 'sub-2', title: '子菜单2', url: '#' },
+    { id: 'sub-1', title: '子菜单1', url: '#', component: 'SubMenu1' },
+    { id: 'sub-2', title: '子菜单2', url: '#', component: 'SubMenu2' },
   ],
 },
 ```
+
+#### NavSubItem 完整字段说明
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `id` | `string` | ✅ | 唯一标识符，用于权限控制 |
+| `title` | `string` | ✅ | 显示的菜单名称 |
+| `url` | `string` | ✅ | 链接地址（SPA 中通常为 `#`） |
+| `component` | `string` | ❌ | 对应的页面组件名，需在 App.vue 中注册 |
+| `badge` | `string` | ❌ | 可选的徽章文本 |
 
 #### 配置团队权限
 
@@ -175,7 +185,7 @@ const pageMap: Record<string, string> = {
 当需要从列表页进入详情页时：
 
 ```typescript
-import { useNavigation } from '@/composables/useNavigation'
+import { useNavigation } from '@/config/sidebar'
 
 const { setDetailTitle } = useNavigation()
 

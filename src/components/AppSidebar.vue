@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { SidebarProps } from '@/components/ui/sidebar'
-import { defaultSidebarConfig, type SidebarConfig, type NavMainItem } from '@/config/sidebar'
+import { defaultSidebarConfig, type SidebarConfig } from '@/config/sidebar'
 
 import NavMain from '@/components/NavMain.vue'
 import NavProjects from '@/components/NavProjects.vue'

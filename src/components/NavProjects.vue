@@ -23,7 +23,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { useNavigation } from '@/composables/useNavigation'
+import { useNavigation } from '@/config/sidebar'
 
 const props = withDefaults(
   defineProps<{

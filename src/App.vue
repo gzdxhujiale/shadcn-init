@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
-import { useNavigation } from '@/composables/useNavigation'
+import { useNavigation } from '@/config/sidebar'
 
 // 导入页面组件
 import TodoList from '@/components/pages/workspace/TodoList.vue'
