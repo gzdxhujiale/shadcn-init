@@ -10,42 +10,7 @@
 - 📊 **页面组件化** - 模块化的页面管理结构
 - 🎯 **Teleport 传送门** - 灵活的 UI 组件位置控制
 
----
 
-## 🆕 更新日志
-
-### 2026-01-09 导航系统 & 页面架构更新
-
-#### 新增功能
-1. **导航状态管理 (useNavigation)**
-   - 创建 `src/composables/useNavigation.ts`
-   - 管理当前导航状态和面包屑数据
-   - 支持三级面包屑（一级菜单 > 二级菜单 > 详情页）
-
-2. **页面组件目录结构**
-   - 创建 `src/components/pages/` 目录
-   - 添加示例页面 `workspace/TodoList.vue`
-   - 包含表格、筛选器、分页和 Teleport 功能示例
-
-3. **面包屑导航**
-   - 在 `App.vue` 中添加完整的面包屑组件
-   - 支持动态更新，点击可返回上级
-   - 第三级面包屑用于详情页展示
-
-4. **Teleport 操作区域**
-   - 在 header 右侧添加 `#breadcrumb-actions` Teleport 目标
-   - 各页面可通过 Teleport 在面包屑旁渲染自定义内容（如统计数据）
-
-5. **导航项激活状态**
-   - 更新 `NavMain.vue` 和 `NavProjects.vue`
-   - 当前选中的菜单项高亮显示
-   - 父级菜单在子项激活时也会高亮
-
-#### 修复问题
-- 修复 TypeScript 配置，支持 ES2020 特性
-- 修复 TodoList.vue 中的类型错误
-
----
 
 ## 📁 项目结构
 
