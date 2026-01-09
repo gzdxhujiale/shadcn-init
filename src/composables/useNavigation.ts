@@ -1,8 +1,14 @@
 import { ref, computed } from 'vue'
+import { defaultSidebarConfig } from '@/config/sidebar'
+
+// 从配置中获取默认导航
+const firstNavGroup = defaultSidebarConfig.navGroups[0]
+const firstMainNav = firstNavGroup?.items[0]
+const firstSubNav = firstMainNav?.items?.[0]
 
 // 导航状态
-const currentMainNav = ref('工作台')
-const currentSubNav = ref('待办清单')
+const currentMainNav = ref(firstMainNav?.title ?? '')
+const currentSubNav = ref(firstSubNav?.title ?? '')
 const detailTitle = ref<string | null>(null) // 存储详情页标题（第三级面包屑）
 
 /**
