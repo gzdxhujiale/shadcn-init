@@ -62,7 +62,7 @@ export function useNavigation() {
             '用户操作手册': 'UserManual',
         }
 
-        return pageMap[currentSubNav.value] || 'TodoList'
+        return pageMap[currentSubNav.value] || currentSubNav.value
     })
 
     return {
